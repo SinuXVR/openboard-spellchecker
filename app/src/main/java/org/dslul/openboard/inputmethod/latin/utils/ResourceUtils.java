@@ -18,77 +18,19 @@ package org.dslul.openboard.inputmethod.latin.utils;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
-import android.os.Build;
-import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 
 import org.dslul.openboard.inputmethod.annotations.UsedForTesting;
-import org.dslul.openboard.inputmethod.latin.R;
-import org.dslul.openboard.inputmethod.latin.settings.SettingsValues;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.PatternSyntaxException;
 
 public final class ResourceUtils {
     private static final String TAG = ResourceUtils.class.getSimpleName();
 
-    public static final float UNDEFINED_RATIO = -1.0f;
-    public static final int UNDEFINED_DIMENSION = -1;
-
     private ResourceUtils() {
         // This utility class is not publicly instantiable.
-    }
-
-    private static final HashMap<String, String> sDeviceOverrideValueMap = new HashMap<>();
-
-    private static final String[] BUILD_KEYS_AND_VALUES = {
-        "HARDWARE", Build.HARDWARE,
-        "MODEL", Build.MODEL,
-        "BRAND", Build.BRAND,
-        "MANUFACTURER", Build.MANUFACTURER
-    };
-    private static final HashMap<String, String> sBuildKeyValues;
-    private static final String sBuildKeyValuesDebugString;
-
-    static {
-        sBuildKeyValues = new HashMap<>();
-        final ArrayList<String> keyValuePairs = new ArrayList<>();
-        final int keyCount = BUILD_KEYS_AND_VALUES.length / 2;
-        for (int i = 0; i < keyCount; i++) {
-            final int index = i * 2;
-            final String key = BUILD_KEYS_AND_VALUES[index];
-            final String value = BUILD_KEYS_AND_VALUES[index + 1];
-            sBuildKeyValues.put(key, value);
-            keyValuePairs.add(key + '=' + value);
-        }
-        sBuildKeyValuesDebugString = "[" + TextUtils.join(" ", keyValuePairs) + "]";
-    }
-
-    public static String getDeviceOverrideValue(final Resources res, final int overrideResId,
-            final String defaultValue) {
-        final int orientation = res.getConfiguration().orientation;
-        final String key = overrideResId + "-" + orientation;
-        if (sDeviceOverrideValueMap.containsKey(key)) {
-            return sDeviceOverrideValueMap.get(key);
-        }
-
-        final String[] overrideArray = res.getStringArray(overrideResId);
-        final String overrideValue = findConstantForKeyValuePairs(sBuildKeyValues, overrideArray);
-        // The overrideValue might be an empty string.
-        if (overrideValue != null) {
-            Log.i(TAG, "Find override value:"
-                    + " resource="+ res.getResourceEntryName(overrideResId)
-                    + " build=" + sBuildKeyValuesDebugString
-                    + " override=" + overrideValue);
-            sDeviceOverrideValueMap.put(key, overrideValue);
-            return overrideValue;
-        }
-
-        sDeviceOverrideValueMap.put(key, defaultValue);
-        return defaultValue;
     }
 
     @SuppressWarnings("serial")
@@ -182,74 +124,8 @@ public final class ResourceUtils {
         return matchedAll;
     }
 
-    public static int getDefaultKeyboardWidth(final Resources res) {
-        final DisplayMetrics dm = res.getDisplayMetrics();
-        return dm.widthPixels;
-    }
-
-    public static int getKeyboardHeight(final Resources res, final SettingsValues settingsValues) {
-        final int defaultKeyboardHeight = getDefaultKeyboardHeight(res);
-        if (settingsValues.mHasKeyboardResize) {
-            // mKeyboardHeightScale Ranges from [.5,1.2], from xml/prefs_screen_debug.xml
-            return (int)(defaultKeyboardHeight * settingsValues.mKeyboardHeightScale);
-        }
-        return defaultKeyboardHeight;
-    }
-
-    public static int getDefaultKeyboardHeight(final Resources res) {
-        final DisplayMetrics dm = res.getDisplayMetrics();
-        final float keyboardHeight = res.getDimension(R.dimen.config_default_keyboard_height);
-        final float maxKeyboardHeight = res.getFraction(
-                R.fraction.config_max_keyboard_height, dm.heightPixels, dm.heightPixels);
-        float minKeyboardHeight = res.getFraction(
-                R.fraction.config_min_keyboard_height, dm.heightPixels, dm.heightPixels);
-        if (minKeyboardHeight < 0.0f) {
-            // Specified fraction was negative, so it should be calculated against display
-            // width.
-            minKeyboardHeight = -res.getFraction(
-                    R.fraction.config_min_keyboard_height, dm.widthPixels, dm.widthPixels);
-        }
-        // Keyboard height will not exceed maxKeyboardHeight and will not be less than
-        // minKeyboardHeight.
-        return (int)Math.max(Math.min(keyboardHeight, maxKeyboardHeight), minKeyboardHeight);
-    }
-
-    public static boolean isValidFraction(final float fraction) {
-        return fraction >= 0.0f;
-    }
-
-    // {@link Resources#getDimensionPixelSize(int)} returns at least one pixel size.
-    public static boolean isValidDimensionPixelSize(final int dimension) {
-        return dimension > 0;
-    }
-
-    // {@link Resources#getDimensionPixelOffset(int)} may return zero pixel offset.
-    public static boolean isValidDimensionPixelOffset(final int dimension) {
-        return dimension >= 0;
-    }
-
     public static float getFloatFromFraction(final Resources res, final int fractionResId) {
         return res.getFraction(fractionResId, 1, 1);
-    }
-
-    public static float getFraction(final TypedArray a, final int index, final float defValue) {
-        final TypedValue value = a.peekValue(index);
-        if (value == null || !isFractionValue(value)) {
-            return defValue;
-        }
-        return a.getFraction(index, 1, 1, defValue);
-    }
-
-    public static float getFraction(final TypedArray a, final int index) {
-        return getFraction(a, index, UNDEFINED_RATIO);
-    }
-
-    public static int getDimensionPixelSize(final TypedArray a, final int index) {
-        final TypedValue value = a.peekValue(index);
-        if (value == null || !isDimensionValue(value)) {
-            return ResourceUtils.UNDEFINED_DIMENSION;
-        }
-        return a.getDimensionPixelSize(index, ResourceUtils.UNDEFINED_DIMENSION);
     }
 
     public static float getDimensionOrFraction(final TypedArray a, final int index, final int base,

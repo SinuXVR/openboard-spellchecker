@@ -28,11 +28,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public class KeyboardParams {
     public KeyboardId mId;
-    public int mThemeId;
 
     /** Total height and width of the keyboard, including the paddings and keys */
     public int mOccupiedHeight;
@@ -49,8 +47,6 @@ public class KeyboardParams {
     public int mLeftPadding;
     public int mRightPadding;
 
-    @Nullable
-    public KeyVisualAttributes mKeyVisualAttributes;
 
     public int mDefaultRowHeight;
     public int mDefaultKeyWidth;
@@ -70,8 +66,6 @@ public class KeyboardParams {
     public final ArrayList<Key> mShiftKeys = new ArrayList<>();
     @Nonnull
     public final ArrayList<Key> mAltCodeKeysWhileTyping = new ArrayList<>();
-    @Nonnull
-    public final KeyboardIconsSet mIconsSet = new KeyboardIconsSet();
     @Nonnull
     public final KeyboardTextsSet mTextsSet = new KeyboardTextsSet();
     @Nonnull
@@ -102,18 +96,8 @@ public class KeyboardParams {
         }
     };
 
-    public KeyboardParams() {
-        this(UniqueKeysCache.NO_CACHE);
-    }
-
     public KeyboardParams(@Nonnull final UniqueKeysCache keysCache) {
         mUniqueKeysCache = keysCache;
-    }
-
-    protected void clearKeys() {
-        mSortedKeys.clear();
-        mShiftKeys.clear();
-        clearHistogram();
     }
 
     public void onAddKey(@Nonnull final Key newKey) {
@@ -131,42 +115,12 @@ public class KeyboardParams {
         if (key.getCode() == Constants.CODE_SHIFT) {
             mShiftKeys.add(key);
         }
-        if (key.altCodeWhileTyping()) {
-            mAltCodeKeysWhileTyping.add(key);
-        }
-    }
-
-    public void removeRedundantMoreKeys() {
-        if (mAllowRedundantMoreKeys) {
-            return;
-        }
-        final MoreKeySpec.LettersOnBaseLayout lettersOnBaseLayout =
-                new MoreKeySpec.LettersOnBaseLayout();
-        for (final Key key : mSortedKeys) {
-            lettersOnBaseLayout.addLetter(key);
-        }
-        final ArrayList<Key> allKeys = new ArrayList<>(mSortedKeys);
-        mSortedKeys.clear();
-        for (final Key key : allKeys) {
-            final Key filteredKey = Key.removeRedundantMoreKeys(key, lettersOnBaseLayout);
-            mSortedKeys.add(mUniqueKeysCache.getUniqueKey(filteredKey));
-        }
     }
 
     private int mMaxHeightCount = 0;
     private int mMaxWidthCount = 0;
     private final SparseIntArray mHeightHistogram = new SparseIntArray();
     private final SparseIntArray mWidthHistogram = new SparseIntArray();
-
-    private void clearHistogram() {
-        mMostCommonKeyHeight = 0;
-        mMaxHeightCount = 0;
-        mHeightHistogram.clear();
-
-        mMaxWidthCount = 0;
-        mMostCommonKeyWidth = 0;
-        mWidthHistogram.clear();
-    }
 
     private static int updateHistogramCounter(final SparseIntArray histogram, final int key) {
         final int index = histogram.indexOfKey(key);

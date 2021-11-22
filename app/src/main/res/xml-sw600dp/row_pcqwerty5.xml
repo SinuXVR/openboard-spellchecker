@@ -46,10 +46,5 @@
                     latin:keyWidth="42.0%p" />
             </default>
         </switch>
-        <include
-            latin:keyXPos="-9.0%p"
-            latin:keyWidth="9.0%p"
-            latin:backgroundType="functional"
-            latin:keyboardLayout="@xml/key_emoji" />
     </Row>
 </merge>

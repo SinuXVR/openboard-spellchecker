@@ -56,10 +56,6 @@ public final class KeySpecParser {
         // Intentional empty constructor for utility class.
     }
 
-    private static boolean hasIcon(@Nonnull final String keySpec) {
-        return keySpec.startsWith(KeyboardIconsSet.PREFIX_ICON);
-    }
-
     private static boolean hasCode(@Nonnull final String keySpec, final int labelEnd) {
         if (labelEnd <= 0 || labelEnd + 1 >= keySpec.length()) {
             return false;
@@ -138,9 +134,6 @@ public final class KeySpecParser {
     public static String getLabel(@Nullable final String keySpec) {
         if (keySpec == null) {
             // TODO: Throw {@link KeySpecParserError} once Key.keyLabel attribute becomes mandatory.
-            return null;
-        }
-        if (hasIcon(keySpec)) {
             return null;
         }
         final int labelEnd = indexOfLabelEnd(keySpec);
@@ -230,20 +223,6 @@ public final class KeySpecParser {
             return Integer.parseInt(text.substring(PREFIX_HEX.length()), 16);
         }
         return defaultCode;
-    }
-
-    public static int getIconId(@Nullable final String keySpec) {
-        if (keySpec == null) {
-            // TODO: Throw {@link KeySpecParserError} once Key.keyLabel attribute becomes mandatory.
-            return KeyboardIconsSet.ICON_UNDEFINED;
-        }
-        if (!hasIcon(keySpec)) {
-            return KeyboardIconsSet.ICON_UNDEFINED;
-        }
-        final int labelEnd = indexOfLabelEnd(keySpec);
-        final String iconName = getBeforeLabelEnd(keySpec, labelEnd)
-                .substring(KeyboardIconsSet.PREFIX_ICON.length());
-        return KeyboardIconsSet.getIconId(iconName);
     }
 
     @SuppressWarnings("serial")

@@ -52,8 +52,6 @@ import javax.annotation.Nonnull;
  */
 public final class AndroidSpellCheckerService extends SpellCheckerService
         implements SharedPreferences.OnSharedPreferenceChangeListener {
-    private static final String TAG = AndroidSpellCheckerService.class.getSimpleName();
-    private static final boolean DEBUG = false;
 
     public static final String PREF_USE_CONTACTS_KEY = "pref_spellcheck_use_contacts";
 

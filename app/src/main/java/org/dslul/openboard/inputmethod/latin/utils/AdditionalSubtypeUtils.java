@@ -18,13 +18,7 @@ package org.dslul.openboard.inputmethod.latin.utils;
 
 import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.inputmethod.InputMethodSubtype;
-
-import org.dslul.openboard.inputmethod.annotations.UsedForTesting;
-import org.dslul.openboard.inputmethod.compat.InputMethodSubtypeCompatUtils;
-import org.dslul.openboard.inputmethod.latin.R;
-import org.dslul.openboard.inputmethod.latin.common.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,26 +31,10 @@ import static org.dslul.openboard.inputmethod.latin.common.Constants.Subtype.Ext
 import static org.dslul.openboard.inputmethod.latin.common.Constants.Subtype.KEYBOARD_MODE;
 
 public final class AdditionalSubtypeUtils {
-    private static final String TAG = AdditionalSubtypeUtils.class.getSimpleName();
-
-    private static final InputMethodSubtype[] EMPTY_SUBTYPE_ARRAY = new InputMethodSubtype[0];
 
     private AdditionalSubtypeUtils() {
         // This utility class is not publicly instantiable.
     }
-
-    @UsedForTesting
-    public static boolean isAdditionalSubtype(final InputMethodSubtype subtype) {
-        return subtype.containsExtraValueKey(IS_ADDITIONAL_SUBTYPE);
-    }
-
-    private static final String LOCALE_AND_LAYOUT_SEPARATOR = ":";
-    private static final int INDEX_OF_LOCALE = 0;
-    private static final int INDEX_OF_KEYBOARD_LAYOUT = 1;
-    private static final int INDEX_OF_EXTRA_VALUE = 2;
-    private static final int LENGTH_WITHOUT_EXTRA_VALUE = (INDEX_OF_KEYBOARD_LAYOUT + 1);
-    private static final int LENGTH_WITH_EXTRA_VALUE = (INDEX_OF_EXTRA_VALUE + 1);
-    private static final String PREF_SUBTYPE_SEPARATOR = ";";
 
     private static InputMethodSubtype createAdditionalSubtypeInternal(
             final String localeString, final String keyboardLayoutSetName,
@@ -69,7 +47,7 @@ public final class AdditionalSubtypeUtils {
         // NOTE: In KitKat and later, InputMethodSubtypeBuilder#setIsAsciiCapable is also available.
         // TODO: Use InputMethodSubtypeBuilder#setIsAsciiCapable when appropriate.
         return new InputMethodSubtype(nameId,
-                R.drawable.ic_ime_switcher_dark, localeString, KEYBOARD_MODE,
+                0, localeString, KEYBOARD_MODE,
                 platformVersionDependentExtraValues,
                 false /* isAuxiliary */, false /* overrideImplicitlyEnabledSubtype */,
                 platformVersionIndependentSubtypeId);
@@ -79,83 +57,6 @@ public final class AdditionalSubtypeUtils {
             final String localeString, final String keyboardLayoutSetName) {
         return createAdditionalSubtypeInternal(localeString, keyboardLayoutSetName,
                 false /* isAsciiCapable */, false /* isEmojiCapable */);
-    }
-
-    public static InputMethodSubtype createAsciiEmojiCapableAdditionalSubtype(
-            final String localeString, final String keyboardLayoutSetName) {
-        return createAdditionalSubtypeInternal(localeString, keyboardLayoutSetName,
-                true /* isAsciiCapable */, true /* isEmojiCapable */);
-    }
-
-    public static String getPrefSubtype(final InputMethodSubtype subtype) {
-        final String localeString = subtype.getLocale();
-        final String keyboardLayoutSetName = SubtypeLocaleUtils.getKeyboardLayoutSetName(subtype);
-        final String layoutExtraValue = KEYBOARD_LAYOUT_SET + "=" + keyboardLayoutSetName;
-        final String extraValue = StringUtils.removeFromCommaSplittableTextIfExists(
-                layoutExtraValue, StringUtils.removeFromCommaSplittableTextIfExists(
-                        IS_ADDITIONAL_SUBTYPE, subtype.getExtraValue()));
-        final String basePrefSubtype = localeString + LOCALE_AND_LAYOUT_SEPARATOR
-                + keyboardLayoutSetName;
-        return extraValue.isEmpty() ? basePrefSubtype
-                : basePrefSubtype + LOCALE_AND_LAYOUT_SEPARATOR + extraValue;
-    }
-
-    public static InputMethodSubtype[] createAdditionalSubtypesArray(final String prefSubtypes) {
-        if (TextUtils.isEmpty(prefSubtypes)) {
-            return EMPTY_SUBTYPE_ARRAY;
-        }
-        final String[] prefSubtypeArray = prefSubtypes.split(PREF_SUBTYPE_SEPARATOR);
-        final ArrayList<InputMethodSubtype> subtypesList = new ArrayList<>(prefSubtypeArray.length);
-        for (final String prefSubtype : prefSubtypeArray) {
-            final String[] elems = prefSubtype.split(LOCALE_AND_LAYOUT_SEPARATOR);
-            if (elems.length != LENGTH_WITHOUT_EXTRA_VALUE
-                    && elems.length != LENGTH_WITH_EXTRA_VALUE) {
-                Log.w(TAG, "Unknown additional subtype specified: " + prefSubtype + " in "
-                        + prefSubtypes);
-                continue;
-            }
-            final String localeString = elems[INDEX_OF_LOCALE];
-            final String keyboardLayoutSetName = elems[INDEX_OF_KEYBOARD_LAYOUT];
-            // Here we assume that all the additional subtypes have AsciiCapable and EmojiCapable.
-            // This is actually what the setting dialog for additional subtype is doing.
-            final InputMethodSubtype subtype = createAsciiEmojiCapableAdditionalSubtype(
-                    localeString, keyboardLayoutSetName);
-            if (subtype.getNameResId() == SubtypeLocaleUtils.UNKNOWN_KEYBOARD_LAYOUT) {
-                // Skip unknown keyboard layout subtype. This may happen when predefined keyboard
-                // layout has been removed.
-                continue;
-            }
-            subtypesList.add(subtype);
-        }
-        return subtypesList.toArray(new InputMethodSubtype[subtypesList.size()]);
-    }
-
-    public static String createPrefSubtypes(final InputMethodSubtype[] subtypes) {
-        if (subtypes == null || subtypes.length == 0) {
-            return "";
-        }
-        final StringBuilder sb = new StringBuilder();
-        for (final InputMethodSubtype subtype : subtypes) {
-            if (sb.length() > 0) {
-                sb.append(PREF_SUBTYPE_SEPARATOR);
-            }
-            sb.append(getPrefSubtype(subtype));
-        }
-        return sb.toString();
-    }
-
-    public static String createPrefSubtypes(final String[] prefSubtypes) {
-        if (prefSubtypes == null || prefSubtypes.length == 0) {
-            return "";
-        }
-        final StringBuilder sb = new StringBuilder();
-        for (final String prefSubtype : prefSubtypes) {
-            if (sb.length() > 0) {
-                sb.append(PREF_SUBTYPE_SEPARATOR);
-            }
-            sb.append(prefSubtype);
-        }
-        return sb.toString();
     }
 
     /**

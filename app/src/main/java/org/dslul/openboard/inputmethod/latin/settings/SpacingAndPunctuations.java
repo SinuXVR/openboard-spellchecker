@@ -20,7 +20,7 @@ import android.content.res.Resources;
 
 import org.dslul.openboard.inputmethod.annotations.UsedForTesting;
 import org.dslul.openboard.inputmethod.keyboard.internal.MoreKeySpec;
-import org.dslul.openboard.inputmethod.latin.PunctuationSuggestions;
+
 import org.dslul.openboard.inputmethod.latin.R;
 import org.dslul.openboard.inputmethod.latin.common.Constants;
 import org.dslul.openboard.inputmethod.latin.common.StringUtils;
@@ -34,7 +34,6 @@ public final class SpacingAndPunctuations {
     private final int[] mSortedSymbolsClusteringTogether;
     private final int[] mSortedWordConnectors;
     public final int[] mSortedWordSeparators;
-    public final PunctuationSuggestions mSuggestPuncList;
     private final int mSentenceSeparator;
     private final int mAbbreviationMarker;
     private final int[] mSortedSentenceTerminators;
@@ -71,7 +70,6 @@ public final class SpacingAndPunctuations {
         mUsesGermanRules = Locale.GERMAN.getLanguage().equals(locale.getLanguage());
         final String[] suggestPuncsSpec = MoreKeySpec.splitKeySpecs(
                 res.getString(R.string.suggested_punctuations));
-        mSuggestPuncList = PunctuationSuggestions.newPunctuationSuggestions(suggestPuncsSpec);
     }
 
     @UsedForTesting
@@ -83,7 +81,6 @@ public final class SpacingAndPunctuations {
         mSortedWordConnectors = model.mSortedWordConnectors;
         mSortedWordSeparators = overrideSortedWordSeparators;
         mSortedSentenceTerminators = model.mSortedSentenceTerminators;
-        mSuggestPuncList = model.mSuggestPuncList;
         mSentenceSeparator = model.mSentenceSeparator;
         mAbbreviationMarker = model.mAbbreviationMarker;
         mSentenceSeparatorAndSpace = model.mSentenceSeparatorAndSpace;
@@ -138,8 +135,6 @@ public final class SpacingAndPunctuations {
         sb.append("" + Arrays.toString(mSortedWordConnectors));
         sb.append("\n   mSortedWordSeparators = ");
         sb.append("" + Arrays.toString(mSortedWordSeparators));
-        sb.append("\n   mSuggestPuncList = ");
-        sb.append("" + mSuggestPuncList);
         sb.append("\n   mSentenceSeparator = ");
         sb.append("" + mSentenceSeparator);
         sb.append("\n   mSentenceSeparatorAndSpace = ");

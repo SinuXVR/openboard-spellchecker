@@ -31,7 +31,6 @@ import org.dslul.openboard.inputmethod.annotations.UsedForTesting;
 import org.dslul.openboard.inputmethod.keyboard.Key;
 import org.dslul.openboard.inputmethod.keyboard.Keyboard;
 import org.dslul.openboard.inputmethod.keyboard.KeyboardId;
-import org.dslul.openboard.inputmethod.keyboard.KeyboardTheme;
 import org.dslul.openboard.inputmethod.latin.R;
 import org.dslul.openboard.inputmethod.latin.common.Constants;
 import org.dslul.openboard.inputmethod.latin.common.StringUtils;
@@ -42,7 +41,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Locale;
 
 import javax.annotation.Nonnull;
@@ -271,15 +269,11 @@ public class KeyboardBuilder<KP extends KeyboardParams> {
             params.mDefaultRowHeight = (int)ResourceUtils.getDimensionOrFraction(keyboardAttr,
                     R.styleable.Keyboard_rowHeight, baseHeight, baseHeight / DEFAULT_KEYBOARD_ROWS);
 
-            params.mKeyVisualAttributes = KeyVisualAttributes.newInstance(keyAttr);
-
             params.mMoreKeysTemplate = keyboardAttr.getResourceId(
                     R.styleable.Keyboard_moreKeysTemplate, 0);
             params.mMaxMoreKeysKeyboardColumn = keyAttr.getInt(
                     R.styleable.Keyboard_Key_maxMoreKeysColumn, 5);
 
-            params.mThemeId = keyboardAttr.getInt(R.styleable.Keyboard_themeId, 0);
-            params.mIconsSet.loadIcons(keyboardAttr);
             params.mTextsSet.setLocale(params.mId.getLocale(), mContext);
 
             final int resourceId = keyboardAttr.getResourceId(
@@ -439,41 +433,30 @@ public class KeyboardBuilder<KP extends KeyboardParams> {
                 }
                 final String label;
                 final int code;
-                final String outputText;
                 final int supportedMinSdkVersion;
-                final String moreKeySpecs;
                 if (codesArrayId != 0) {
                     final String codeArraySpec = array[i];
                     label = CodesArrayParser.parseLabel(codeArraySpec);
                     code = CodesArrayParser.parseCode(codeArraySpec);
-                    outputText = CodesArrayParser.parseOutputText(codeArraySpec);
                     supportedMinSdkVersion =
                             CodesArrayParser.getMinSupportSdkVersion(codeArraySpec);
-                    moreKeySpecs = MoreCodesArrayParser.parseKeySpecs(
-                            arrayMore != null ? arrayMore[i] : null);
                 } else {
                     final String textArraySpec = array[i];
                     // TODO: Utilize KeySpecParser or write more generic TextsArrayParser.
                     label = textArraySpec;
                     code = Constants.CODE_OUTPUT_TEXT;
-                    outputText = textArraySpec + (char)Constants.CODE_SPACE;
                     supportedMinSdkVersion = 0;
-                    moreKeySpecs = null;
                 }
                 if (Build.VERSION.SDK_INT < supportedMinSdkVersion) {
                     continue;
                 }
                 final int labelFlags = row.getDefaultKeyLabelFlags();
                 // TODO: Should be able to assign default keyActionFlags as well.
-                final int backgroundType = row.getDefaultBackgroundType();
                 final int x = (int)row.getKeyX(null);
                 final int y = row.getKeyY();
                 final int width = (int)keyWidth;
                 final int height = row.getRowHeight();
-                final String hintLabel = moreKeySpecs != null ? "\u25E5" : null;
-                final KeyboardParams params = mParams;
-                final Key key = new Key(label, code, outputText,  hintLabel, moreKeySpecs,
-                        labelFlags, backgroundType, x, y, width, height, params);
+                final Key key = new Key(label, code, labelFlags, x, y, width, height, mParams);
                 endKey(key);
                 row.advanceXPos(keyWidth);
             }
@@ -499,10 +482,6 @@ public class KeyboardBuilder<KP extends KeyboardParams> {
         }
         final Key key = new Key(keySpec, keyAttr, keyStyle, mParams, row);
         keyAttr.recycle();
-        if (DEBUG) {
-            startEndTag("<%s%s %s moreKeys=%s />", TAG_KEY, (key.isEnabled() ? "" : " disabled"),
-                    key, Arrays.toString(key.getMoreKeys()));
-        }
         XmlParseUtils.checkEndTag(TAG_KEY, parser);
         endKey(key);
     }
@@ -664,9 +643,6 @@ public class KeyboardBuilder<KP extends KeyboardParams> {
             final boolean keyboardLayoutSetElementMatched = matchTypedValue(caseAttr,
                     R.styleable.Keyboard_Case_keyboardLayoutSetElement, id.mElementId,
                     KeyboardId.elementIdToName(id.mElementId));
-            final boolean keyboardThemeMacthed = matchTypedValue(caseAttr,
-                    R.styleable.Keyboard_Case_keyboardTheme, mParams.mThemeId,
-                    KeyboardTheme.getKeyboardThemeName(mParams.mThemeId));
             final boolean modeMatched = matchTypedValue(caseAttr,
                     R.styleable.Keyboard_Case_mode, id.mMode, KeyboardId.modeName(id.mMode));
             final boolean navigateNextMatched = matchBoolean(caseAttr,
@@ -692,8 +668,6 @@ public class KeyboardBuilder<KP extends KeyboardParams> {
                     R.styleable.Keyboard_Case_isMultiLine, id.isMultiLine());
             final boolean imeActionMatched = matchInteger(caseAttr,
                     R.styleable.Keyboard_Case_imeAction, id.imeAction());
-            final boolean isIconDefinedMatched = isIconDefined(caseAttr,
-                    R.styleable.Keyboard_Case_isIconDefined, mParams.mIconsSet);
             final Locale locale = id.getLocale();
             final boolean localeCodeMatched = matchLocaleCodes(caseAttr, locale);
             final boolean languageCodeMatched = matchLanguageCodes(caseAttr, locale);
@@ -701,10 +675,10 @@ public class KeyboardBuilder<KP extends KeyboardParams> {
             final boolean splitLayoutMatched = matchBoolean(caseAttr,
                     R.styleable.Keyboard_Case_isSplitLayout, id.mIsSplitLayout);
             final boolean selected = keyboardLayoutSetMatched && keyboardLayoutSetElementMatched
-                    && keyboardThemeMacthed && modeMatched && navigateNextMatched
+                    && modeMatched && navigateNextMatched
                     && navigatePreviousMatched && passwordInputMatched && clobberSettingsKeyMatched
                     && hasShortcutKeyMatched && numberRowEnabledMatched  && languageSwitchKeyEnabledMatched
-                    && emojiKeyEnabledMatched && isMultiLineMatched && imeActionMatched && isIconDefinedMatched
+                    && emojiKeyEnabledMatched && isMultiLineMatched && imeActionMatched
                     && localeCodeMatched && languageCodeMatched && countryCodeMatched
                     && splitLayoutMatched;
 
@@ -805,16 +779,6 @@ public class KeyboardBuilder<KP extends KeyboardParams> {
         return false;
     }
 
-    private static boolean isIconDefined(final TypedArray a, final int index,
-            final KeyboardIconsSet iconsSet) {
-        if (!a.hasValue(index)) {
-            return true;
-        }
-        final String iconName = a.getString(index);
-        final int iconId = KeyboardIconsSet.getIconId(iconName);
-        return iconsSet.getIconDrawable(iconId) != null;
-    }
-
     private boolean parseDefault(final XmlPullParser parser, final KeyboardRow row,
             final boolean skip) throws XmlPullParserException, IOException {
         if (DEBUG) startTag("<%s>", TAG_DEFAULT);
@@ -891,7 +855,6 @@ public class KeyboardBuilder<KP extends KeyboardParams> {
     }
 
     private void endKeyboard() {
-        mParams.removeRedundantMoreKeys();
         // {@link #parseGridRows(XmlPullParser,boolean)} may populate keyboard rows higher than
         // previously expected.
         final int actualHeight = mCurrentY - mParams.mVerticalGap + mParams.mBottomPadding;

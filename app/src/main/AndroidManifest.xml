@@ -49,18 +49,6 @@
             android:directBootAware="true"
             android:extractNativeLibs="false">
 
-        <!-- Services -->
-        <service android:name="LatinIME"
-                android:label="@string/english_ime_name"
-                android:permission="android.permission.BIND_INPUT_METHOD"
-                android:directBootAware="true"
-                android:exported="true">
-            <intent-filter>
-                <action android:name="android.view.InputMethod" />
-            </intent-filter>
-            <meta-data android:name="android.view.im" android:resource="@xml/method" />
-        </service>
-
         <service android:name=".spellcheck.AndroidSpellCheckerService"
                  android:label="@string/spell_checker_service_name"
                  android:permission="android.permission.BIND_TEXT_SERVICE"
@@ -72,44 +60,11 @@
                     android:resource="@xml/spellchecker" />
         </service>
 
-        <!-- Activities -->
-        <activity android:name=".setup.SetupActivity"
-                android:theme="@style/platformActivityTheme"
-                android:label="@string/english_ime_name"
-                android:icon="@mipmap/ic_launcher"
-                android:launchMode="singleTask"
-                android:noHistory="true"
-                android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
         <activity
             android:name=".permissions.PermissionsActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:exported="false"
             android:taskAffinity="" >
-        </activity>
-
-        <activity android:name=".setup.SetupWizardActivity"
-                android:theme="@style/platformActivityTheme"
-                android:label="@string/english_ime_name"
-                android:clearTaskOnLaunch="true"
-                android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".settings.SettingsActivity"
-                android:theme="@style/platformSettingsTheme"
-                android:label="@string/english_ime_settings"
-                android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-            </intent-filter>
         </activity>
 
         <activity android:name=".spellcheck.SpellCheckerSettingsActivity"
@@ -124,23 +79,6 @@
         <!-- Unexported activity used for tests. -->
         <activity android:name=".settings.TestFragmentActivity"
                 android:exported="false" />
-
-        <!-- Broadcast receivers -->
-        <receiver android:name="SystemBroadcastReceiver"
-                android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.USER_INITIALIZE" />
-                <action android:name="android.intent.action.LOCALE_CHANGED" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name="DictionaryPackInstallBroadcastReceiver" android:exported="false">
-            <intent-filter>
-                <action android:name="org.dslul.openboard.inputmethod.dictionarypack.aosp.UNKNOWN_CLIENT" />
-            </intent-filter>
-        </receiver>
 
         <!-- Content providers -->
         <provider android:name="org.dslul.openboard.inputmethod.dictionarypack.DictionaryProvider"

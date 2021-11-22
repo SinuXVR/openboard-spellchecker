@@ -22,13 +22,11 @@ import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.inputmethod.InputMethodSubtype;
 
 import org.dslul.openboard.inputmethod.annotations.UsedForTesting;
 import org.dslul.openboard.inputmethod.latin.AssetFileAddress;
 import org.dslul.openboard.inputmethod.latin.BinaryDictionaryGetter;
 import org.dslul.openboard.inputmethod.latin.R;
-import org.dslul.openboard.inputmethod.latin.RichInputMethodManager;
 import org.dslul.openboard.inputmethod.latin.common.LocaleUtils;
 import org.dslul.openboard.inputmethod.latin.define.DecoderSpecificConstants;
 import org.dslul.openboard.inputmethod.latin.makedict.DictionaryHeader;
@@ -458,17 +456,6 @@ public class DictionaryInfoUtils {
             if (dictionaryInfo == null || !dictionaryInfo.mLocale.equals(locale)) {
                 continue;
             }
-            addOrUpdateDictInfo(dictList, dictionaryInfo);
-        }
-
-        // Generate the dictionary information from  the enabled subtypes. This will not
-        // overwrite the real records.
-        RichInputMethodManager.init(context);
-        List<InputMethodSubtype> enabledSubtypes = RichInputMethodManager
-                .getInstance().getMyEnabledInputMethodSubtypeList(true);
-        for (InputMethodSubtype subtype : enabledSubtypes) {
-            Locale locale = LocaleUtils.constructLocaleFromString(subtype.getLocale());
-            DictionaryInfo dictionaryInfo = createDictionaryInfoFromLocale(locale);
             addOrUpdateDictInfo(dictList, dictionaryInfo);
         }
 

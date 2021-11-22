@@ -24,16 +24,11 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.util.Log;
 
-import org.dslul.openboard.inputmethod.latin.AudioAndHapticFeedbackManager;
 import org.dslul.openboard.inputmethod.latin.InputAttributes;
 import org.dslul.openboard.inputmethod.latin.R;
 import org.dslul.openboard.inputmethod.latin.common.StringUtils;
-import org.dslul.openboard.inputmethod.latin.utils.AdditionalSubtypeUtils;
 import org.dslul.openboard.inputmethod.latin.utils.DeviceProtectedUtils;
-import org.dslul.openboard.inputmethod.latin.utils.JniUtils;
-import org.dslul.openboard.inputmethod.latin.utils.ResourceUtils;
 import org.dslul.openboard.inputmethod.latin.utils.RunInLocale;
-import org.dslul.openboard.inputmethod.latin.utils.StatsUtils;
 
 import java.util.Collections;
 import java.util.Locale;
@@ -172,7 +167,6 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
                 return;
             }
             loadSettings(mContext, mSettingsValues.mLocale, mSettingsValues.mInputAttributes);
-            StatsUtils.onLoadSettings(mSettingsValues);
         } finally {
             mSettingsValuesLock.unlock();
         }
@@ -216,13 +210,6 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
                 res.getBoolean(R.bool.config_default_sound_enabled));
     }
 
-    public static boolean readVibrationEnabled(final SharedPreferences prefs,
-                                               final Resources res) {
-        final boolean hasVibrator = AudioAndHapticFeedbackManager.getInstance().hasVibrator();
-        return hasVibrator && prefs.getBoolean(PREF_VIBRATE_ON,
-                res.getBoolean(R.bool.config_default_vibration_enabled));
-    }
-
     public static boolean readAutoCorrectEnabled(final SharedPreferences prefs,
                                                  final Resources res) {
         return prefs.getBoolean(PREF_AUTO_CORRECTION, true);
@@ -236,19 +223,6 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
                                                         final Resources res) {
         return prefs.getBoolean(PREF_BLOCK_POTENTIALLY_OFFENSIVE,
                 res.getBoolean(R.bool.config_block_potentially_offensive));
-    }
-
-    public static boolean readFromBuildConfigIfGestureInputEnabled(final Resources res) {
-        if (!JniUtils.sHaveGestureLib) {
-            return false;
-        }
-        return res.getBoolean(R.bool.config_gesture_input_enabled_by_build_config);
-    }
-
-    public static boolean readGestureInputEnabled(final SharedPreferences prefs,
-                                                  final Resources res) {
-        return readFromBuildConfigIfGestureInputEnabled(res)
-                && prefs.getBoolean(PREF_GESTURE_INPUT, true);
     }
 
     public static boolean readFromBuildConfigIfToShowKeyPreviewPopupOption(final Resources res) {
@@ -269,62 +243,8 @@ public final class Settings implements SharedPreferences.OnSharedPreferenceChang
         return prefs.getBoolean(PREF_ALWAYS_INCOGNITO_MODE, false);
     }
 
-    public static String readPrefAdditionalSubtypes(final SharedPreferences prefs,
-                                                    final Resources res) {
-        final String predefinedPrefSubtypes = AdditionalSubtypeUtils.createPrefSubtypes(
-                res.getStringArray(R.array.predefined_subtypes));
-        return prefs.getString(PREF_CUSTOM_INPUT_STYLES, predefinedPrefSubtypes);
-    }
-
-    public static void writePrefAdditionalSubtypes(final SharedPreferences prefs,
-                                                   final String prefSubtypes) {
-        prefs.edit().putString(PREF_CUSTOM_INPUT_STYLES, prefSubtypes).apply();
-    }
-
-    public static float readKeypressSoundVolume(final SharedPreferences prefs,
-                                                final Resources res) {
-        final float volume = prefs.getFloat(
-                PREF_KEYPRESS_SOUND_VOLUME, UNDEFINED_PREFERENCE_VALUE_FLOAT);
-        return (volume != UNDEFINED_PREFERENCE_VALUE_FLOAT) ? volume
-                : readDefaultKeypressSoundVolume(res);
-    }
-
-    // Default keypress sound volume for unknown devices.
-    // The negative value means system default.
-    private static final String DEFAULT_KEYPRESS_SOUND_VOLUME = Float.toString(-1.0f);
-
-    public static float readDefaultKeypressSoundVolume(final Resources res) {
-        return Float.parseFloat(ResourceUtils.getDeviceOverrideValue(res,
-                R.array.keypress_volumes, DEFAULT_KEYPRESS_SOUND_VOLUME));
-    }
-
-    public static int readKeyLongpressTimeout(final SharedPreferences prefs,
-                                              final Resources res) {
-        final int milliseconds = prefs.getInt(
-                PREF_KEY_LONGPRESS_TIMEOUT, UNDEFINED_PREFERENCE_VALUE_INT);
-        return (milliseconds != UNDEFINED_PREFERENCE_VALUE_INT) ? milliseconds
-                : readDefaultKeyLongpressTimeout(res);
-    }
-
     public static int readDefaultKeyLongpressTimeout(final Resources res) {
         return res.getInteger(R.integer.config_default_longpress_key_timeout);
-    }
-
-    public static int readKeypressVibrationDuration(final SharedPreferences prefs,
-                                                    final Resources res) {
-        final int milliseconds = prefs.getInt(
-                PREF_VIBRATION_DURATION_SETTINGS, UNDEFINED_PREFERENCE_VALUE_INT);
-        return (milliseconds != UNDEFINED_PREFERENCE_VALUE_INT) ? milliseconds
-                : readDefaultKeypressVibrationDuration(res);
-    }
-
-    // Default keypress vibration duration for unknown devices.
-    // The negative value means system default.
-    private static final String DEFAULT_KEYPRESS_VIBRATION_DURATION = Integer.toString(-1);
-
-    public static int readDefaultKeypressVibrationDuration(final Resources res) {
-        return Integer.parseInt(ResourceUtils.getDeviceOverrideValue(res,
-                R.array.keypress_vibration_durations, DEFAULT_KEYPRESS_VIBRATION_DURATION));
     }
 
     public static float readKeyPreviewAnimationScale(final SharedPreferences prefs,

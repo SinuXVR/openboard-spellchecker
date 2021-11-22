@@ -25,10 +25,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.Xml;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodSubtype;
 
 import org.dslul.openboard.inputmethod.compat.EditorInfoCompatUtils;
-import org.dslul.openboard.inputmethod.compat.InputMethodSubtypeCompatUtils;
 import org.dslul.openboard.inputmethod.compat.UserManagerCompatUtils;
 import org.dslul.openboard.inputmethod.keyboard.internal.KeyboardBuilder;
 import org.dslul.openboard.inputmethod.keyboard.internal.KeyboardParams;
@@ -36,10 +34,8 @@ import org.dslul.openboard.inputmethod.keyboard.internal.UniqueKeysCache;
 import org.dslul.openboard.inputmethod.latin.InputAttributes;
 import org.dslul.openboard.inputmethod.latin.R;
 import org.dslul.openboard.inputmethod.latin.RichInputMethodSubtype;
-import org.dslul.openboard.inputmethod.latin.common.StringUtils;
 import org.dslul.openboard.inputmethod.latin.utils.InputTypeUtils;
 import org.dslul.openboard.inputmethod.latin.utils.ScriptUtils;
-import org.dslul.openboard.inputmethod.latin.utils.SubtypeLocaleUtils;
 import org.dslul.openboard.inputmethod.latin.utils.XmlParseUtils;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -75,20 +71,10 @@ public final class KeyboardLayoutSet {
     @Nonnull
     private final Params mParams;
 
-    // How many layouts we forcibly keep in cache. This only includes ALPHABET (default) and
-    // ALPHABET_AUTOMATIC_SHIFTED layouts - other layouts may stay in memory in the map of
-    // soft-references, but we forcibly cache this many alphabetic/auto-shifted layouts.
-    private static final int FORCIBLE_CACHE_SIZE = 4;
-    // By construction of soft references, anything that is also referenced somewhere else
-    // will stay in the cache. So we forcibly keep some references in an array to prevent
-    // them from disappearing from sKeyboardCache.
-    private static final Keyboard[] sForcibleKeyboardCache = new Keyboard[FORCIBLE_CACHE_SIZE];
     private static final HashMap<KeyboardId, SoftReference<Keyboard>> sKeyboardCache =
             new HashMap<>();
     @Nonnull
     private static final UniqueKeysCache sUniqueKeysCache = UniqueKeysCache.newInstance();
-    private final static HashMap<InputMethodSubtype, Integer> sScriptIdsForSubtypes =
-            new HashMap<>();
 
     @SuppressWarnings("serial")
     public static final class KeyboardLayoutSetException extends RuntimeException {
@@ -138,36 +124,10 @@ public final class KeyboardLayoutSet {
                 new SparseArray<>();
     }
 
-    public static void onSystemLocaleChanged() {
-        clearKeyboardCache();
-    }
-
-    public static void onKeyboardThemeChanged() {
-        clearKeyboardCache();
-    }
-
-    private static void clearKeyboardCache() {
-        sKeyboardCache.clear();
-        sUniqueKeysCache.clear();
-    }
-
-    public static int getScriptId(final Resources resources,
-                                  @Nonnull final InputMethodSubtype subtype) {
-        final Integer value = sScriptIdsForSubtypes.get(subtype);
-        if (null == value) {
-            final int scriptId = Builder.readScriptId(resources, subtype);
-            sScriptIdsForSubtypes.put(subtype, scriptId);
-            return scriptId;
-        }
-        return value;
-    }
-
     KeyboardLayoutSet(final Context context, @Nonnull final Params params) {
         mContext = context;
         mParams = params;
     }
-
-    public static final String LOCALE_GEORGIAN = "ka";
 
     @Nonnull
     public Keyboard getKeyboard(final int baseKeyboardLayoutSetElementId) {
@@ -240,11 +200,6 @@ public final class KeyboardLayoutSet {
         if ((id.mElementId == KeyboardId.ELEMENT_ALPHABET
                 || id.mElementId == KeyboardId.ELEMENT_ALPHABET_AUTOMATIC_SHIFTED)
                 && !mParams.mIsSpellChecker) {
-            // We only forcibly cache the primary, "ALPHABET", layouts.
-            for (int i = sForcibleKeyboardCache.length - 1; i >= 1; --i) {
-                sForcibleKeyboardCache[i] = sForcibleKeyboardCache[i - 1];
-            }
-            sForcibleKeyboardCache[0] = keyboard;
             if (DEBUG_CACHE) {
                 Log.d(TAG, "forcing caching of keyboard with id=" + id);
             }
@@ -321,59 +276,9 @@ public final class KeyboardLayoutSet {
             return this;
         }
 
-        public Builder setVoiceInputKeyEnabled(final boolean enabled) {
-            mParams.mVoiceInputKeyEnabled = enabled;
-            return this;
-        }
-        
-        public Builder setNumberRowEnabled(final boolean enabled) {
-            mParams.mNumberRowEnabled = enabled;
-            return this;
-        }
-
-        public Builder setLanguageSwitchKeyEnabled(final boolean enabled) {
-            mParams.mLanguageSwitchKeyEnabled = enabled;
-            return this;
-        }
-
-        public Builder setEmojiKeyEnabled(final boolean enabled) {
-            mParams.mEmojiKeyEnabled = enabled;
-            return this;
-        }
-
         public Builder disableTouchPositionCorrectionData() {
             mParams.mDisableTouchPositionCorrectionDataForTest = true;
             return this;
-        }
-
-        public Builder setSplitLayoutEnabledByUser(final boolean enabled) {
-            mParams.mIsSplitLayoutEnabledByUser = enabled;
-            return this;
-        }
-
-        // Super redux version of reading the script ID for some subtype from Xml.
-        static int readScriptId(final Resources resources, final InputMethodSubtype subtype) {
-            final String layoutSetName = KEYBOARD_LAYOUT_SET_RESOURCE_PREFIX
-                    + SubtypeLocaleUtils.getKeyboardLayoutSetName(subtype);
-            final int xmlId = getXmlId(resources, layoutSetName);
-            final XmlResourceParser parser = resources.getXml(xmlId);
-            try {
-                while (parser.getEventType() != XmlPullParser.END_DOCUMENT) {
-                    // Bovinate through the XML stupidly searching for TAG_FEATURE, and read
-                    // the script Id from it.
-                    parser.next();
-                    final String tag = parser.getName();
-                    if (TAG_FEATURE.equals(tag)) {
-                        return readScriptIdFromTagFeature(resources, parser);
-                    }
-                }
-            } catch (final IOException | XmlPullParserException e) {
-                throw new RuntimeException(e.getMessage() + " in " + layoutSetName, e);
-            } finally {
-                parser.close();
-            }
-            // If the tag is not found, then the default script is Latin.
-            return ScriptUtils.SCRIPT_LATIN;
         }
 
         private static int readScriptIdFromTagFeature(final Resources resources,

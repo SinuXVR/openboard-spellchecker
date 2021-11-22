@@ -22,7 +22,6 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import org.dslul.openboard.inputmethod.compat.InputMethodSubtypeCompatUtils;
 import org.dslul.openboard.inputmethod.latin.common.Constants;
-import org.dslul.openboard.inputmethod.latin.common.LocaleUtils;
 import org.dslul.openboard.inputmethod.latin.utils.SubtypeLocaleUtils;
 
 import java.util.HashMap;
@@ -62,12 +61,10 @@ public class RichInputMethodSubtype {
     private final InputMethodSubtype mSubtype;
     @Nonnull
     private final Locale mLocale;
-    @Nonnull
-    private final Locale mOriginalLocale;
 
     public RichInputMethodSubtype(@Nonnull final InputMethodSubtype subtype) {
         mSubtype = subtype;
-        mOriginalLocale = InputMethodSubtypeCompatUtils.getLocaleObject(mSubtype);
+        Locale mOriginalLocale = InputMethodSubtypeCompatUtils.getLocaleObject(mSubtype);
         final Locale mappedLocale = sLocaleMap.get(mOriginalLocale);
         mLocale = mappedLocale != null ? mappedLocale : mOriginalLocale;
     }
@@ -85,45 +82,6 @@ public class RichInputMethodSubtype {
 
     public boolean isNoLanguage() {
         return SubtypeLocaleUtils.NO_LANGUAGE.equals(mSubtype.getLocale());
-    }
-
-    public String getNameForLogging() {
-        return toString();
-    }
-
-    // InputMethodSubtype's display name for spacebar text in its locale.
-    //        isAdditionalSubtype (T=true, F=false)
-    // locale layout  |  Middle      Full
-    // ------ ------- - --------- ----------------------
-    //  en_US qwerty  F  English   English (US)           exception
-    //  en_GB qwerty  F  English   English (UK)           exception
-    //  es_US spanish F  Español   Español (EE.UU.)       exception
-    //  fr    azerty  F  Français  Français
-    //  fr_CA qwerty  F  Français  Français (Canada)
-    //  fr_CH swiss   F  Français  Français (Suisse)
-    //  de    qwertz  F  Deutsch   Deutsch
-    //  de_CH swiss   T  Deutsch   Deutsch (Schweiz)
-    //  zz    qwerty  F  QWERTY    QWERTY
-    //  fr    qwertz  T  Français  Français
-    //  de    qwerty  T  Deutsch   Deutsch
-    //  en_US azerty  T  English   English (US)
-    //  zz    azerty  T  AZERTY    AZERTY
-    // Get the RichInputMethodSubtype's full display name in its locale.
-    @Nonnull
-    public String getFullDisplayName() {
-        if (isNoLanguage()) {
-            return SubtypeLocaleUtils.getKeyboardLayoutSetDisplayName(mSubtype);
-        }
-        return SubtypeLocaleUtils.getSubtypeLocaleDisplayName(mSubtype.getLocale());
-    }
-
-    // Get the RichInputMethodSubtype's middle display name in its locale.
-    @Nonnull
-    public String getMiddleDisplayName() {
-        if (isNoLanguage()) {
-            return SubtypeLocaleUtils.getKeyboardLayoutSetDisplayName(mSubtype);
-        }
-        return SubtypeLocaleUtils.getSubtypeLanguageDisplayName(mSubtype.getLocale());
     }
 
     @Override
@@ -148,16 +106,6 @@ public class RichInputMethodSubtype {
     @Nonnull
     public Locale getLocale() {
         return mLocale;
-    }
-
-    @Nonnull
-    public Locale getOriginalLocale() {
-        return mOriginalLocale;
-    }
-
-    public boolean isRtlSubtype() {
-        // The subtype is considered RTL if the language of the main subtype is RTL.
-        return LocaleUtils.isRtlLanguage(mLocale);
     }
 
     // TODO: remove this method
@@ -188,27 +136,12 @@ public class RichInputMethodSubtype {
     @Nonnull
     private static final RichInputMethodSubtype DUMMY_NO_LANGUAGE_SUBTYPE =
             new RichInputMethodSubtype(new InputMethodSubtype(
-                    R.string.subtype_no_language_qwerty, R.drawable.ic_ime_switcher_dark,
+                    R.string.subtype_no_language_qwerty, 0,
                     SubtypeLocaleUtils.NO_LANGUAGE, KEYBOARD_MODE,
                     EXTRA_VALUE_OF_DUMMY_NO_LANGUAGE_SUBTYPE,
                     false /* isAuxiliary */, false /* overridesImplicitlyEnabledSubtype */,
                     SUBTYPE_ID_OF_DUMMY_NO_LANGUAGE_SUBTYPE));
-    // Caveat: We probably should remove this when we add an Emoji subtype in {@link R.xml.method}.
-    // Dummy Emoji subtype. See {@link R.xml.method}.
-    private static final int SUBTYPE_ID_OF_DUMMY_EMOJI_SUBTYPE = 0xd78b2ed0;
-    private static final String EXTRA_VALUE_OF_DUMMY_EMOJI_SUBTYPE =
-            "KeyboardLayoutSet=" + SubtypeLocaleUtils.EMOJI
-            + "," + Constants.Subtype.ExtraValue.EMOJI_CAPABLE;
-    @Nonnull
-    private static final RichInputMethodSubtype DUMMY_EMOJI_SUBTYPE = new RichInputMethodSubtype(
-            new InputMethodSubtype(
-                    R.string.subtype_emoji, R.drawable.ic_ime_switcher_dark,
-                    SubtypeLocaleUtils.NO_LANGUAGE, KEYBOARD_MODE,
-                    EXTRA_VALUE_OF_DUMMY_EMOJI_SUBTYPE,
-                    false /* isAuxiliary */, false /* overridesImplicitlyEnabledSubtype */,
-                    SUBTYPE_ID_OF_DUMMY_EMOJI_SUBTYPE));
     private static RichInputMethodSubtype sNoLanguageSubtype;
-    private static RichInputMethodSubtype sEmojiSubtype;
 
     @Nonnull
     public static RichInputMethodSubtype getNoLanguageSubtype() {
@@ -229,26 +162,5 @@ public class RichInputMethodSubtype {
         Log.w(TAG, "No input method subtype found; returning dummy subtype: "
                 + DUMMY_NO_LANGUAGE_SUBTYPE);
         return DUMMY_NO_LANGUAGE_SUBTYPE;
-    }
-
-    @Nonnull
-    public static RichInputMethodSubtype getEmojiSubtype() {
-        RichInputMethodSubtype emojiSubtype = sEmojiSubtype;
-        if (emojiSubtype == null) {
-            final InputMethodSubtype rawEmojiSubtype = RichInputMethodManager.getInstance()
-                    .findSubtypeByLocaleAndKeyboardLayoutSet(
-                            SubtypeLocaleUtils.NO_LANGUAGE, SubtypeLocaleUtils.EMOJI);
-            if (rawEmojiSubtype != null) {
-                emojiSubtype = new RichInputMethodSubtype(rawEmojiSubtype);
-            }
-        }
-        if (emojiSubtype != null) {
-            sEmojiSubtype = emojiSubtype;
-            return emojiSubtype;
-        }
-        Log.w(TAG, "Can't find emoji subtype");
-        Log.w(TAG, "No input method subtype found; returning dummy subtype: "
-                + DUMMY_EMOJI_SUBTYPE);
-        return DUMMY_EMOJI_SUBTYPE;
     }
 }

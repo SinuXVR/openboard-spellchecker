@@ -20,7 +20,6 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.Xml;
 
-import org.dslul.openboard.inputmethod.keyboard.Key;
 import org.dslul.openboard.inputmethod.keyboard.Keyboard;
 import org.dslul.openboard.inputmethod.latin.R;
 import org.dslul.openboard.inputmethod.latin.utils.ResourceUtils;
@@ -50,8 +49,6 @@ public final class KeyboardRow {
         public final float mDefaultKeyWidth;
         /** Default keyLabelFlags in this row. */
         public final int mDefaultKeyLabelFlags;
-        /** Default backgroundType for this row */
-        public final int mDefaultBackgroundType;
 
         /**
          * Parse and create key attributes. This constructor is used to parse Row tag.
@@ -65,8 +62,6 @@ public final class KeyboardRow {
             mDefaultKeyWidth = keyAttr.getFraction(R.styleable.Keyboard_Key_keyWidth,
                     keyboardWidth, keyboardWidth, defaultKeyWidth);
             mDefaultKeyLabelFlags = keyAttr.getInt(R.styleable.Keyboard_Key_keyLabelFlags, 0);
-            mDefaultBackgroundType = keyAttr.getInt(R.styleable.Keyboard_Key_backgroundType,
-                    Key.BACKGROUND_TYPE_NORMAL);
         }
 
         /**
@@ -83,8 +78,6 @@ public final class KeyboardRow {
                     keyboardWidth, keyboardWidth, defaultRowAttr.mDefaultKeyWidth);
             mDefaultKeyLabelFlags = keyAttr.getInt(R.styleable.Keyboard_Key_keyLabelFlags, 0)
                     | defaultRowAttr.mDefaultKeyLabelFlags;
-            mDefaultBackgroundType = keyAttr.getInt(R.styleable.Keyboard_Key_backgroundType,
-                    defaultRowAttr.mDefaultBackgroundType);
         }
     }
 
@@ -130,10 +123,6 @@ public final class KeyboardRow {
 
     public int getDefaultKeyLabelFlags() {
         return mRowAttributesStack.peek().mDefaultKeyLabelFlags;
-    }
-
-    public int getDefaultBackgroundType() {
-        return mRowAttributesStack.peek().mDefaultBackgroundType;
     }
 
     public void setXPos(final float keyXPos) {

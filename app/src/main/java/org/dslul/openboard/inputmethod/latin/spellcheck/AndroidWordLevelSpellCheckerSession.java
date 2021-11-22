@@ -37,7 +37,6 @@ import org.dslul.openboard.inputmethod.latin.common.StringUtils;
 import org.dslul.openboard.inputmethod.latin.define.DebugFlags;
 import org.dslul.openboard.inputmethod.latin.utils.BinaryDictionaryUtils;
 import org.dslul.openboard.inputmethod.latin.utils.ScriptUtils;
-import org.dslul.openboard.inputmethod.latin.utils.StatsUtils;
 import org.dslul.openboard.inputmethod.latin.utils.SuggestionResults;
 
 import java.util.ArrayList;
@@ -300,13 +299,6 @@ public abstract class AndroidWordLevelSpellCheckerSession extends Session {
                     Log.i(TAG, "onGetSuggestionsInternal() : Suggestions =" + builder);
                 }
             }
-            // Handle word not in dictionary.
-            // This is called only once per unique word, so entering multiple
-            // instances of the same word does not result in more than one call
-            // to this method.
-            // Also, upon changing the orientation of the device, this is called
-            // again for every unique invalid word in the text box.
-            StatsUtils.onInvalidWordIdentification(text);
 
             final int flags =
                     SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO
