@@ -9,11 +9,6 @@ object TextInfoCompatUtils {
     private val TEXT_INFO_CONSTRUCTOR_FOR_CHAR_SEQUENCE = CompatUtils.getConstructor(TextInfo::class.java, CharSequence::class.java, Int::class.javaPrimitiveType, Int::class.javaPrimitiveType,
             Int::class.javaPrimitiveType, Int::class.javaPrimitiveType)
 
-    @get:UsedForTesting
-    val isCharSequenceSupported: Boolean
-        get() = TEXT_INFO_GET_CHAR_SEQUENCE != null &&
-                TEXT_INFO_CONSTRUCTOR_FOR_CHAR_SEQUENCE != null
-
     @kotlin.jvm.JvmStatic
     @UsedForTesting
     fun newInstance(charSequence: CharSequence, start: Int, end: Int, cookie: Int,

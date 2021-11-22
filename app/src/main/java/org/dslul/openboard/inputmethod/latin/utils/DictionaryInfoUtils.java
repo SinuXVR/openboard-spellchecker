@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.text.TextUtils;
-import android.util.Log;
 
 import org.dslul.openboard.inputmethod.annotations.UsedForTesting;
 import org.dslul.openboard.inputmethod.latin.AssetFileAddress;
@@ -37,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -219,21 +217,6 @@ public class DictionaryInfoUtils {
         return idArray[0];
     }
 
-    /**
-     * Find out the cache directory associated with a specific locale.
-     */
-    public static String getCacheDirectoryForLocale(final String locale, final Context context) {
-        final String relativeDirectoryName = replaceFileNameDangerousCharacters(locale);
-        final String absoluteDirectoryName = getWordListCacheDirectory(context) + File.separator
-                + relativeDirectoryName;
-        final File directory = new File(absoluteDirectoryName);
-        if (!directory.exists()) {
-            if (!directory.mkdirs()) {
-                Log.e(TAG, "Could not create the directory for locale" + locale);
-            }
-        }
-        return absoluteDirectoryName;
-    }
 
     public static boolean isMainWordListId(final String id) {
         final String[] idArray = id.split(BinaryDictionaryGetter.ID_CATEGORY_SEPARATOR);
@@ -243,17 +226,6 @@ public class DictionaryInfoUtils {
             return false;
         }
         return BinaryDictionaryGetter.MAIN_DICTIONARY_CATEGORY.equals(idArray[0]);
-    }
-
-    /**
-     * Find out whether a dictionary is available for this locale.
-     * @param context the context on which to check resources.
-     * @param locale the locale to check for.
-     * @return whether a (non-placeholder) dictionary is available or not.
-     */
-    public static boolean isDictionaryAvailable(final Context context, final Locale locale) {
-        final Resources res = context.getResources();
-        return 0 != getMainDictionaryResourceIdIfAvailableForLocale(res, locale);
     }
 
     /**
@@ -348,44 +320,6 @@ public class DictionaryInfoUtils {
         final String filenameToStoreOnDb = null;
         return new DictionaryInfo(id, locale, description, filenameToStoreOnDb,
                 fileAddress.mLength, new File(fileAddress.mFilename).lastModified(), version);
-    }
-
-    /**
-     * Returns the information of the dictionary for the given {@link AssetFileAddress}.
-     * If the file is corrupted or a pre-fava file, then the file gets deleted and the null
-     * value is returned.
-     */
-    @Nullable
-    private static DictionaryInfo createDictionaryInfoForUnCachedFile(
-            @Nonnull final AssetFileAddress fileAddress, final Locale locale) {
-        final String id = getMainDictId(locale);
-        final int version = DictionaryHeaderUtils.getContentVersion(fileAddress);
-
-        if (version == -1) {
-            // Purge the pre-fava/corrupted unused dictionaires.
-            fileAddress.deleteUnderlyingFile();
-            return null;
-        }
-
-        final String description = SubtypeLocaleUtils
-                .getSubtypeLocaleDisplayName(locale.toString());
-
-        final File unCachedFile = new File(fileAddress.mFilename);
-        // Store just the filename and not the full path.
-        final String filenameToStoreOnDb = unCachedFile.getName();
-        return new DictionaryInfo(id, locale, description, filenameToStoreOnDb, fileAddress.mLength,
-                unCachedFile.lastModified(), version);
-    }
-
-    /**
-     * Returns dictionary information for the given locale.
-     */
-    private static DictionaryInfo createDictionaryInfoFromLocale(Locale locale) {
-        final String id = getMainDictId(locale);
-        final int version = -1;
-        final String description = SubtypeLocaleUtils
-                .getSubtypeLocaleDisplayName(locale.toString());
-        return new DictionaryInfo(id, locale, description, null, 0L, 0L, version);
     }
 
     private static void addOrUpdateDictInfo(final ArrayList<DictionaryInfo> dictList,

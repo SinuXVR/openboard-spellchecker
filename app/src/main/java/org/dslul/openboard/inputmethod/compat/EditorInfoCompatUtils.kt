@@ -1,7 +1,6 @@
 package org.dslul.openboard.inputmethod.compat
 
 import android.view.inputmethod.EditorInfo
-import java.util.*
 
 object EditorInfoCompatUtils {
     // Note that EditorInfo.IME_FLAG_FORCE_ASCII has been introduced
@@ -32,35 +31,5 @@ object EditorInfoCompatUtils {
             EditorInfo.IME_ACTION_PREVIOUS -> "actionPrevious"
             else -> "actionUnknown($actionId)"
         }
-    }
-
-    fun imeOptionsName(imeOptions: Int): String {
-        val action = imeActionName(imeOptions)
-        val flags = StringBuilder()
-        if (imeOptions and EditorInfo.IME_FLAG_NO_ENTER_ACTION != 0) {
-            flags.append("flagNoEnterAction|")
-        }
-        if (imeOptions and EditorInfo.IME_FLAG_NAVIGATE_NEXT != 0) {
-            flags.append("flagNavigateNext|")
-        }
-        if (imeOptions and EditorInfo.IME_FLAG_NAVIGATE_PREVIOUS != 0) {
-            flags.append("flagNavigatePrevious|")
-        }
-        if (hasFlagForceAscii(imeOptions)) {
-            flags.append("flagForceAscii|")
-        }
-        return if (action != null) flags.toString() + action else flags.toString()
-    }
-
-    @kotlin.jvm.JvmStatic
-    fun getPrimaryHintLocale(editorInfo: EditorInfo?): Locale? {
-        if (editorInfo == null) {
-            return null
-        }
-        val localeList = CompatUtils.getFieldValue(editorInfo, null, FIELD_HINT_LOCALES)
-                ?: return null
-        return if (LocaleListCompatUtils.isEmpty(localeList)) {
-            null
-        } else LocaleListCompatUtils.get(localeList, 0)
     }
 }

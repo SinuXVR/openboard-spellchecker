@@ -24,7 +24,6 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Utilities to manage executors.
@@ -89,30 +88,6 @@ public class ExecutorUtils {
                 return sKeyboardExecutorService;
             case SPELLING:
                 return sSpellingExecutorService;
-            default:
-                throw new IllegalArgumentException("Invalid executor: " + name);
-        }
-    }
-
-    public static void killTasks(final String name) {
-        final ScheduledExecutorService executorService = getBackgroundExecutor(name);
-        executorService.shutdownNow();
-        try {
-            executorService.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Log.wtf(TAG, "Failed to shut down: " + name);
-        }
-        if (executorService == sExecutorServiceForTests) {
-            // Don't do anything to the test service.
-            return;
-        }
-        switch (name) {
-            case KEYBOARD:
-                sKeyboardExecutorService = newExecutorService(KEYBOARD);
-                break;
-            case SPELLING:
-                sSpellingExecutorService = newExecutorService(SPELLING);
-                break;
             default:
                 throw new IllegalArgumentException("Invalid executor: " + name);
         }

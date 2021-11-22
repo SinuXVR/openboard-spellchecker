@@ -20,10 +20,7 @@ import android.app.backup.BackupManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.res.Resources;
 import android.os.Bundle;
-import android.preference.ListPreference;
-import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.util.Log;
@@ -36,58 +33,8 @@ public abstract class SubScreenFragment extends PreferenceFragment
         implements OnSharedPreferenceChangeListener {
     private OnSharedPreferenceChangeListener mSharedPreferenceChangeListener;
 
-    static void setPreferenceEnabled(final String prefKey, final boolean enabled,
-            final PreferenceScreen screen) {
-        final Preference preference = screen.findPreference(prefKey);
-        if (preference != null) {
-            preference.setEnabled(enabled);
-        }
-    }
-
-    static void removePreference(final String prefKey, final PreferenceScreen screen) {
-        final Preference preference = screen.findPreference(prefKey);
-        if (preference != null) {
-            screen.removePreference(preference);
-        }
-    }
-
-    static void updateListPreferenceSummaryToCurrentValue(final String prefKey,
-            final PreferenceScreen screen) {
-        // Because the "%s" summary trick of {@link ListPreference} doesn't work properly before
-        // KitKat, we need to update the summary programmatically.
-        final ListPreference listPreference = (ListPreference)screen.findPreference(prefKey);
-        if (listPreference == null) {
-            return;
-        }
-        final CharSequence[] entries = listPreference.getEntries();
-        final int entryIndex = listPreference.findIndexOfValue(listPreference.getValue());
-        listPreference.setSummary(entryIndex < 0 ? null : entries[entryIndex]);
-    }
-
-    final void setPreferenceEnabled(final String prefKey, final boolean enabled) {
-        setPreferenceEnabled(prefKey, enabled, getPreferenceScreen());
-    }
-
-    final void removePreference(final String prefKey) {
-        removePreference(prefKey, getPreferenceScreen());
-    }
-
-    final void updateListPreferenceSummaryToCurrentValue(final String prefKey) {
-        updateListPreferenceSummaryToCurrentValue(prefKey, getPreferenceScreen());
-    }
-
     final SharedPreferences getSharedPreferences() {
         return getPreferenceManager().getSharedPreferences();
-    }
-
-    /**
-     * Gets the application name to display on the UI.
-     */
-    final String getApplicationName() {
-        final Context context = getActivity();
-        final Resources res = getResources();
-        final int applicationLabelRes = context.getApplicationInfo().labelRes;
-        return res.getString(applicationLabelRes);
     }
 
     @Override

@@ -101,30 +101,6 @@ public final class SpacingAndPunctuations {
         return Character.isLetter(code) || isWordConnector(code);
     }
 
-    public boolean isUsuallyPrecededBySpace(final int code) {
-        return Arrays.binarySearch(mSortedSymbolsPrecededBySpace, code) >= 0;
-    }
-
-    public boolean isUsuallyFollowedBySpace(final int code) {
-        return Arrays.binarySearch(mSortedSymbolsFollowedBySpace, code) >= 0;
-    }
-
-    public boolean isClusteringSymbol(final int code) {
-        return Arrays.binarySearch(mSortedSymbolsClusteringTogether, code) >= 0;
-    }
-
-    public boolean isSentenceTerminator(final int code) {
-        return Arrays.binarySearch(mSortedSentenceTerminators, code) >= 0;
-    }
-
-    public boolean isAbbreviationMarker(final int code) {
-        return code == mAbbreviationMarker;
-    }
-
-    public boolean isSentenceSeparator(final int code) {
-        return code == mSentenceSeparator;
-    }
-
     public String dump() {
         final StringBuilder sb = new StringBuilder();
         sb.append("mSortedSymbolsPrecededBySpace = ");

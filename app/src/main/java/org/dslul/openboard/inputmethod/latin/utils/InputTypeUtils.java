@@ -41,10 +41,6 @@ public final class InputTypeUtils implements InputType {
         // This utility class is not publicly instantiable.
     }
 
-    private static boolean isWebEditTextInputType(final int inputType) {
-        return inputType == (TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_WEB_EDIT_TEXT);
-    }
-
     private static boolean isWebPasswordInputType(final int inputType) {
         return WEB_TEXT_PASSWORD_INPUT_TYPE != 0
                 && inputType == WEB_TEXT_PASSWORD_INPUT_TYPE;
@@ -71,13 +67,6 @@ public final class InputTypeUtils implements InputType {
     public static boolean isEmailVariation(final int variation) {
         return variation == TYPE_TEXT_VARIATION_EMAIL_ADDRESS
                 || isWebEmailAddressVariation(variation);
-    }
-
-    public static boolean isWebInputType(final int inputType) {
-        final int maskedInputType =
-                inputType & (TYPE_MASK_CLASS | TYPE_MASK_VARIATION);
-        return isWebEditTextInputType(maskedInputType) || isWebPasswordInputType(maskedInputType)
-                || isWebEmailAddressInputType(maskedInputType);
     }
 
     // Please refer to TextView.isPasswordInputType

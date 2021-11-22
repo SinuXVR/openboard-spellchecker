@@ -30,10 +30,6 @@ class DictionaryProvider : ContentProvider() {
         private val TAG = DictionaryProvider::class.java.simpleName
         const val DEBUG = false
         val CONTENT_URI = Uri.parse(ContentResolver.SCHEME_CONTENT + "://" + DictionaryPackConstants.AUTHORITY)
-        private const val QUERY_PARAMETER_MAY_PROMPT_USER = "mayPrompt"
-        private const val QUERY_PARAMETER_TRUE = "true"
-        private const val QUERY_PARAMETER_DELETE_RESULT = "result"
-        private const val QUERY_PARAMETER_FAILURE = "failure"
         const val QUERY_PARAMETER_PROTOCOL_VERSION = "protocol"
         private const val NO_MATCH = 0
         private const val DICTIONARY_V1_WHOLE_LIST = 1

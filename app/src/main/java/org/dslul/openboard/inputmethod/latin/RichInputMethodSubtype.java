@@ -108,10 +108,6 @@ public class RichInputMethodSubtype {
         return mLocale;
     }
 
-    // TODO: remove this method
-    @Nonnull
-    public InputMethodSubtype getRawSubtype() { return mSubtype; }
-
     @Nonnull
     public String getKeyboardLayoutSetName() {
         return SubtypeLocaleUtils.getKeyboardLayoutSetName(mSubtype);

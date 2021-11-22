@@ -3,11 +3,7 @@ package org.dslul.openboard.inputmethod.compat
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.text.TextUtils
-import android.util.Log
 import android.view.inputmethod.InputMethodSubtype
-import org.dslul.openboard.inputmethod.annotations.UsedForTesting
-import org.dslul.openboard.inputmethod.latin.RichInputMethodSubtype
-import org.dslul.openboard.inputmethod.latin.common.Constants
 import org.dslul.openboard.inputmethod.latin.common.LocaleUtils
 import java.util.*
 

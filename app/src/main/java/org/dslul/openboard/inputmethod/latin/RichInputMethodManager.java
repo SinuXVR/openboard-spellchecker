@@ -27,10 +27,7 @@ import org.dslul.openboard.inputmethod.latin.utils.SubtypeLocaleUtils;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 /**
  * Enrichment class for InputMethodManager to simplify interaction and add functionality.
@@ -46,14 +43,10 @@ public class RichInputMethodManager {
 
     private static final RichInputMethodManager sInstance = new RichInputMethodManager();
 
-    private Context mContext;
     private InputMethodManagerCompatWrapper mImmWrapper;
     private InputMethodInfoCache mInputMethodInfoCache;
-    private RichInputMethodSubtype mCurrentRichInputMethodSubtype;
     private InputMethodInfo mShortcutInputMethodInfo;
     private InputMethodSubtype mShortcutSubtype;
-
-    private static final int INDEX_NOT_FOUND = -1;
 
     public static RichInputMethodManager getInstance() {
         sInstance.checkInitialized();
@@ -79,7 +72,6 @@ public class RichInputMethodManager {
             return;
         }
         mImmWrapper = new InputMethodManagerCompatWrapper(context);
-        mContext = context;
         mInputMethodInfoCache = new InputMethodInfoCache(
                 mImmWrapper.mImm, context.getPackageName());
 
@@ -93,12 +85,6 @@ public class RichInputMethodManager {
     public InputMethodManager getInputMethodManager() {
         checkInitialized();
         return mImmWrapper.mImm;
-    }
-
-    public List<InputMethodSubtype> getMyEnabledInputMethodSubtypeList(
-            boolean allowsImplicitlySelectedSubtypes) {
-        return getEnabledInputMethodSubtypeList(
-                getInputMethodInfoOfThisIme(), allowsImplicitlySelectedSubtypes);
     }
 
     private static class InputMethodInfoCache {
@@ -158,42 +144,6 @@ public class RichInputMethodManager {
         return mInputMethodInfoCache.getInputMethodOfThisIme();
     }
 
-    public String getInputMethodIdOfThisIme() {
-        return getInputMethodInfoOfThisIme().getId();
-    }
-
-    public boolean checkIfSubtypeBelongsToThisImeAndEnabled(final InputMethodSubtype subtype) {
-        return checkIfSubtypeBelongsToList(subtype,
-                getEnabledInputMethodSubtypeList(
-                        getInputMethodInfoOfThisIme(),
-                        true /* allowsImplicitlySelectedSubtypes */));
-    }
-
-    public boolean checkIfSubtypeBelongsToThisImeAndImplicitlyEnabled(
-            final InputMethodSubtype subtype) {
-        final boolean subtypeEnabled = checkIfSubtypeBelongsToThisImeAndEnabled(subtype);
-        final boolean subtypeExplicitlyEnabled = checkIfSubtypeBelongsToList(subtype,
-                getMyEnabledInputMethodSubtypeList(false /* allowsImplicitlySelectedSubtypes */));
-        return subtypeEnabled && !subtypeExplicitlyEnabled;
-    }
-
-    private static boolean checkIfSubtypeBelongsToList(final InputMethodSubtype subtype,
-            final List<InputMethodSubtype> subtypes) {
-        return getSubtypeIndexInList(subtype, subtypes) != INDEX_NOT_FOUND;
-    }
-
-    private static int getSubtypeIndexInList(final InputMethodSubtype subtype,
-            final List<InputMethodSubtype> subtypes) {
-        final int count = subtypes.size();
-        for (int index = 0; index < count; index++) {
-            final InputMethodSubtype ims = subtypes.get(index);
-            if (ims.equals(subtype)) {
-                return index;
-            }
-        }
-        return INDEX_NOT_FOUND;
-    }
-
     public InputMethodSubtype findSubtypeByLocaleAndKeyboardLayoutSet(final String localeString,
             final String keyboardLayoutSetName) {
         final InputMethodInfo myImi = getInputMethodInfoOfThisIme();
@@ -209,20 +159,9 @@ public class RichInputMethodManager {
         return null;
     }
 
-    private List<InputMethodSubtype> getEnabledInputMethodSubtypeList(final InputMethodInfo imi,
-            final boolean allowsImplicitlySelectedSubtypes) {
-        return mInputMethodInfoCache.getEnabledInputMethodSubtypeList(
-                imi, allowsImplicitlySelectedSubtypes);
-    }
-
     public void refreshSubtypeCaches() {
         mInputMethodInfoCache.clear();
-        updateCurrentSubtype(mImmWrapper.mImm.getCurrentInputMethodSubtype());
         updateShortcutIme();
-    }
-
-    private void updateCurrentSubtype(@Nullable final InputMethodSubtype subtype) {
-        mCurrentRichInputMethodSubtype = RichInputMethodSubtype.getRichInputMethodSubtype(subtype);
     }
 
     private void updateShortcutIme() {
@@ -233,10 +172,6 @@ public class RichInputMethodManager {
                     + (mShortcutSubtype == null ? "<null>" : (
                             mShortcutSubtype.getLocale() + ", " + mShortcutSubtype.getMode())));
         }
-        final RichInputMethodSubtype richSubtype = mCurrentRichInputMethodSubtype;
-        final boolean implicitlyEnabledSubtype = checkIfSubtypeBelongsToThisImeAndImplicitlyEnabled(
-                richSubtype.getRawSubtype());
-        final Locale systemLocale = mContext.getResources().getConfiguration().locale;
 
         // TODO: Update an icon for shortcut IME
         final Map<InputMethodInfo, List<InputMethodSubtype>> shortcuts =

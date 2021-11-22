@@ -21,26 +21,19 @@ import android.view.inputmethod.CompletionInfo;
 
 import org.dslul.openboard.inputmethod.annotations.UsedForTesting;
 import org.dslul.openboard.inputmethod.latin.common.StringUtils;
-import org.dslul.openboard.inputmethod.latin.define.DebugFlags;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SuggestedWords {
     public static final int INDEX_OF_TYPED_WORD = 0;
-    public static final int INDEX_OF_AUTO_CORRECTION = 1;
     public static final int NOT_A_SEQUENCE_NUMBER = -1;
 
     public static final int INPUT_STYLE_NONE = 0;
     public static final int INPUT_STYLE_TYPING = 1;
-    public static final int INPUT_STYLE_UPDATE_BATCH = 2;
-    public static final int INPUT_STYLE_TAIL_BATCH = 3;
-    public static final int INPUT_STYLE_APPLICATION_SPECIFIED = 4;
-    public static final int INPUT_STYLE_RECORRECTION = 5;
     public static final int INPUT_STYLE_PREDICTION = 6;
     public static final int INPUT_STYLE_BEGINNING_OF_SENTENCE_PREDICTION = 7;
 
@@ -98,86 +91,12 @@ public class SuggestedWords {
     }
 
     /**
-     * Get suggested word to show as suggestions to UI.
-     *
-     * @param shouldShowLxxSuggestionUi true if showing suggestion UI introduced in LXX and later.
-     * @return the count of suggested word to show as suggestions to UI.
-     */
-    public int getWordCountToShow(final boolean shouldShowLxxSuggestionUi) {
-        if (isPrediction() || !shouldShowLxxSuggestionUi) {
-            return size();
-        }
-        return size() - /* typed word */ 1;
-    }
-
-    /**
-     * Get {@link SuggestedWordInfo} object for the typed word.
-     * @return The {@link SuggestedWordInfo} object for the typed word.
-     */
-    public SuggestedWordInfo getTypedWordInfo() {
-        return mTypedWordInfo;
-    }
-
-    /**
-     * Get suggested word at <code>index</code>.
-     * @param index The index of the suggested word.
-     * @return The suggested word.
-     */
-    public String getWord(final int index) {
-        return mSuggestedWordInfoList.get(index).mWord;
-    }
-
-    /**
-     * Get displayed text at <code>index</code>.
-     * In RTL languages, the displayed text on the suggestion strip may be different from the
-     * suggested word that is returned from {@link #getWord(int)}. For example the displayed text
-     * of punctuation suggestion "(" should be ")".
-     * @param index The index of the text to display.
-     * @return The text to be displayed.
-     */
-    public String getLabel(final int index) {
-        return mSuggestedWordInfoList.get(index).mWord;
-    }
-
-    /**
      * Get {@link SuggestedWordInfo} object at <code>index</code>.
      * @param index The index of the {@link SuggestedWordInfo}.
      * @return The {@link SuggestedWordInfo} object.
      */
     public SuggestedWordInfo getInfo(final int index) {
         return mSuggestedWordInfoList.get(index);
-    }
-
-    /**
-     * Gets the suggestion index from the suggestions list.
-     * @param suggestedWordInfo The {@link SuggestedWordInfo} to find the index.
-     * @return The position of the suggestion in the suggestion list.
-     */
-    public int indexOf(SuggestedWordInfo suggestedWordInfo) {
-        return mSuggestedWordInfoList.indexOf(suggestedWordInfo);
-    }
-
-    public String getDebugString(final int pos) {
-        if (!DebugFlags.DEBUG_ENABLED) {
-            return null;
-        }
-        final SuggestedWordInfo wordInfo = getInfo(pos);
-        if (wordInfo == null) {
-            return null;
-        }
-        final String debugString = wordInfo.getDebugString();
-        if (TextUtils.isEmpty(debugString)) {
-            return null;
-        }
-        return debugString;
-    }
-
-    /**
-     * The predicator to tell whether this object represents punctuation suggestions.
-     * @return false if this object desn't represent punctuation suggestions.
-     */
-    public boolean isPunctuationSuggestions() {
-        return false;
     }
 
     @Override
@@ -188,51 +107,6 @@ public class SuggestedWords {
                 + " mWillAutoCorrect=" + mWillAutoCorrect
                 + " mInputStyle=" + mInputStyle
                 + " words=" + Arrays.toString(mSuggestedWordInfoList.toArray());
-    }
-
-    public static ArrayList<SuggestedWordInfo> getFromApplicationSpecifiedCompletions(
-            final CompletionInfo[] infos) {
-        final ArrayList<SuggestedWordInfo> result = new ArrayList<>();
-        for (final CompletionInfo info : infos) {
-            if (null == info || null == info.getText()) {
-                continue;
-            }
-            result.add(new SuggestedWordInfo(info));
-        }
-        return result;
-    }
-
-    @Nonnull
-    public static final SuggestedWords getEmptyInstance() {
-        return SuggestedWords.EMPTY;
-    }
-
-    // Should get rid of the first one (what the user typed previously) from suggestions
-    // and replace it with what the user currently typed.
-    public static ArrayList<SuggestedWordInfo> getTypedWordAndPreviousSuggestions(
-            @Nonnull final SuggestedWordInfo typedWordInfo,
-            @Nonnull final SuggestedWords previousSuggestions) {
-        final ArrayList<SuggestedWordInfo> suggestionsList = new ArrayList<>();
-        final HashSet<String> alreadySeen = new HashSet<>();
-        suggestionsList.add(typedWordInfo);
-        alreadySeen.add(typedWordInfo.mWord);
-        final int previousSize = previousSuggestions.size();
-        for (int index = 1; index < previousSize; index++) {
-            final SuggestedWordInfo prevWordInfo = previousSuggestions.getInfo(index);
-            final String prevWord = prevWordInfo.mWord;
-            // Filter out duplicate suggestions.
-            if (!alreadySeen.contains(prevWord)) {
-                suggestionsList.add(prevWordInfo);
-                alreadySeen.add(prevWord);
-            }
-        }
-        return suggestionsList;
-    }
-
-    public SuggestedWordInfo getAutoCommitCandidate() {
-        if (mSuggestedWordInfoList.size() <= 0) return null;
-        final SuggestedWordInfo candidate = mSuggestedWordInfoList.get(0);
-        return candidate.isEligibleForAutoCommit() ? candidate : null;
     }
 
     // non-final for testability.

@@ -218,14 +218,6 @@ public final class KeyboardId {
         );
     }
 
-    public static boolean equivalentEditorInfoForKeyboard(final EditorInfo a, final EditorInfo b) {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
-        return a.inputType == b.inputType
-                && a.imeOptions == b.imeOptions
-                && TextUtils.equals(a.privateImeOptions, b.privateImeOptions);
-    }
-
     public static String elementIdToName(final int elementId) {
         switch (elementId) {
         case ELEMENT_ALPHABET: return "alphabet";
