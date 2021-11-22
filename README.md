@@ -1,20 +1,6 @@
-# OpenBoard
-<a href='https://f-droid.org/packages/org.dslul.openboard.inputmethod.latin'><img src='https://fdroid.gitlab.io/artwork/badge/get-it-on.png' alt='Get it on F-Droid' height='80'></a>
-<a href='https://play.google.com/store/apps/details?id=org.dslul.openboard.inputmethod.latin&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' height='80px'/></a>
+# OpenBoard SpellChecker
 
-![](images/feature.png)
-
-100% FOSS keyboard, based on AOSP.
-
-## Community [matrix] channel
-![](images/matrix_qr.png)
-
-Join [here](https://matrix.to/#/#openboard:matrix.org?via=matrix.org)
-
-## Common issues
-- Cannot open settings in MIUI
-
-See https://github.com/dslul/openboard/issues/46
+Android Spell Checker service extracted from [OpenBoard](https://github.com/dslul/openboard) keyboard (aka AOSP LatinIME)
 
 ## Contribute
 
@@ -58,9 +44,5 @@ Connect your phone and install the debug APK
 adb install ./app/build/outputs/apk/debug/app-debug.apk
 ```
 ## Credits
-- icon by [Marco TLS](https://www.marcotls.eu)
 
-- [AOSP Keyboard](https://android.googlesource.com/platform/packages/inputmethods/LatinIME/)
-- [LineageOS](https://review.lineageos.org/admin/repos/LineageOS/android_packages_inputmethods_LatinIME)
-- [Simple Keyboard](https://github.com/rkkr/simple-keyboard)
-- [Indic Keyboard](https://gitlab.com/indicproject/indic-keyboard)
+- [OpenBoard](https://github.com/dslul/openboard)
