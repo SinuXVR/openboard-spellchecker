@@ -16,7 +16,6 @@
 
 package org.dslul.openboard.inputmethod.latin.utils;
 
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.Log;
 import android.util.TypedValue;
@@ -122,10 +121,6 @@ public final class ResourceUtils {
             }
         }
         return matchedAll;
-    }
-
-    public static float getFloatFromFraction(final Resources res, final int fractionResId) {
-        return res.getFraction(fractionResId, 1, 1);
     }
 
     public static float getDimensionOrFraction(final TypedArray a, final int index, final int base,

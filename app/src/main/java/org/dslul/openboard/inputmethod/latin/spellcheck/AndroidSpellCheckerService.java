@@ -75,8 +75,7 @@ public final class AndroidSpellCheckerService extends SpellCheckerService
     // The threshold for a suggestion to be considered "recommended".
     private float mRecommendedThreshold;
     // TODO: make a spell checker option to block offensive words or not
-    private final SettingsValuesForSuggestion mSettingsValuesForSuggestion =
-            new SettingsValuesForSuggestion(true /* blockPotentiallyOffensive */);
+    private final SettingsValuesForSuggestion mSettingsValuesForSuggestion = new SettingsValuesForSuggestion(false);
 
     public static final String SINGLE_QUOTE = "\u0027";
     public static final String APOSTROPHE = "\u2019";

@@ -65,7 +65,6 @@ public final class Constants {
         /**
          * The private IME option used to suppress the floating gesture preview for a given text
          * field. This overrides the corresponding keyboard settings preference.
-         * {@link org.dslul.openboard.inputmethod.latin.settings.SettingsValues#mGestureFloatingPreviewTextEnabled}
          */
         public static final String NO_FLOATING_GESTURE_PREVIEW = "noGestureFloatingPreview";
 

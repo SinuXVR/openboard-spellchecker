@@ -20,8 +20,6 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.inputmethod.EditorInfo;
 
-import androidx.core.view.inputmethod.EditorInfoCompat;
-
 import org.dslul.openboard.inputmethod.latin.common.StringUtils;
 import org.dslul.openboard.inputmethod.latin.utils.InputTypeUtils;
 
@@ -49,7 +47,6 @@ public final class InputAttributes {
     /**
      * Whether the floating gesture preview should be disabled. If true, this should override the
      * corresponding keyboard settings preference, always suppressing the floating preview text.
-     * {@link org.dslul.openboard.inputmethod.latin.settings.SettingsValues#mGestureFloatingPreviewTextEnabled}
      */
     final public boolean mDisableGestureFloatingPreviewText;
     final public boolean mIsGeneralTextInput;
@@ -146,14 +143,6 @@ public final class InputAttributes {
 
 
         mNoLearning = flagNoSuggestions || (editorInfo.imeOptions & EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING) != 0;
-    }
-
-    public boolean isTypeNull() {
-        return InputType.TYPE_NULL == mInputType;
-    }
-
-    public boolean isSameInputType(final EditorInfo editorInfo) {
-        return editorInfo.inputType == mInputType;
     }
 
     private boolean hasNoMicrophoneKeyOption() {
